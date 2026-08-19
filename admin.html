@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0F172A">
+  <title>AURA-NDMA | Admin Command Centre</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/admin.css">
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <!-- QR -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+<div id="toast-container"></div>
+
+<div class="admin-app">
+
+  <!-- TOP BAR -->
+  <header class="admin-topbar">
+    <div class="admin-logo">AURA<span>-NDMA</span> <span style="font-size:var(--fs-xs);color:var(--text-muted);font-weight:400">Command Centre</span></div>
+    <div class="admin-topbar-right">
+      <div class="connection-status">
+        <div class="status-dot live" id="conn-dot"></div>
+        <span id="conn-label">LIVE</span>
+      </div>
+      <div class="gps-bar">
+        <div class="gps-dot" id="admin-gps-dot"></div>
+        <span id="admin-gps-status" style="font-size:var(--fs-xs)">GPS OFF</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:var(--sp-2)">
+        <span style="font-size:var(--fs-xs);color:var(--text-muted)">Alerts:</span>
+        <span class="alert-count-badge" id="alert-count">0</span>
+      </div>
+      <div style="font-size:var(--fs-xs);color:var(--text-muted)">
+        Node: <span class="p2p-node-id-display font-mono" style="color:var(--blue)"></span>
+      </div>
+      <a href="index.html" class="btn btn-ghost btn-sm">⇦ Exit</a>
+    </div>
+  </header>
+
+  <!-- BODY -->
+  <div class="admin-body">
+
+    <!-- LEFT SIDEBAR — Module Selector -->
+    <aside class="admin-sidebar">
+      <div class="sidebar-section-label">Incidents</div>
+
+      <button class="module-btn" data-module="sos">
+        <span class="mod-icon">🆘</span>
+        <span>SOS Alerts</span>
+        <span class="mod-badge" id="badge-sos">0</span>
+      </button>
+
+      <button class="module-btn" data-module="supply">
+        <span class="mod-icon">📦</span>
+        <span>Supply Queue</span>
+        <span class="mod-badge green" id="badge-supply">0</span>
+      </button>
+
+      <button class="module-btn" data-module="deadhand">
+        <span class="mod-icon">⏱</span>
+        <span>Dead-Hand Monitor</span>
+        <span class="mod-badge" id="badge-deadhand">0</span>
+      </button>
+
+      <div class="sidebar-section-label" style="margin-top:var(--sp-2)">Comms</div>
+
+      <button class="module-btn" data-module="p2p">
+        <span class="mod-icon">📶</span>
+        <span>P2P Mesh</span>
+        <span class="mod-badge blue" id="badge-p2p">0</span>
+      </button>
+
+      <button class="module-btn" data-module="acoustic">
+        <span class="mod-icon">📡</span>
+        <span>Acoustic Signals</span>
+        <span class="mod-badge blue" id="badge-acoustic">0</span>
+      </button>
+
+      <button class="module-btn" data-module="qr">
+        <span class="mod-icon">🔍</span>
+        <span>QR Scanner</span>
+        <span class="mod-badge amber" id="badge-qr">0</span>
+      </button>
+
+      <div class="sidebar-section-label" style="margin-top:var(--sp-2)">Data</div>
+
+      <button class="module-btn" data-module="missing">
+        <span class="mod-icon">👤</span>
+        <span>Missing Persons</span>
+      </button>
+
+      <button class="module-btn" data-module="camps">
+        <span class="mod-icon">⛺</span>
+        <span>Relief Camps</span>
+      </button>
+
+      <div style="flex:1"></div>
+
+      <button class="module-btn" onclick="MapEng.clearAll();showToast('Map cleared','All pins removed','amber',2000)" style="color:var(--red)">
+        <span class="mod-icon">🗑</span>
+        <span>Clear Map</span>
+      </button>
+    </aside>
+
+    <!-- CENTER — Operational Map -->
+    <div class="admin-map-pane">
+      <div id="command-map" style="flex:1;min-height:400px"></div>
+
+      <!-- Map Toolbar -->
+      <div class="map-toolbar">
+        <button class="map-tool-btn" data-layer="sos">🆘 SOS</button>
+        <button class="map-tool-btn" data-layer="supply">📦 Supply</button>
+        <button class="map-tool-btn" data-layer="deadhand">⏱ Dead Hand</button>
+        <button class="map-tool-btn" data-layer="acoustic">📡 Acoustic</button>
+        <button class="map-tool-btn" data-layer="p2p">📶 P2P</button>
+        <button class="map-tool-btn" data-layer="camps">⛺ Camps</button>
+        <button class="map-tool-btn" data-layer="missing">👤 Missing</button>
+      </div>
+
+      <!-- Map Legend -->
+      <div class="map-legend">
+        <div class="legend-row"><div class="legend-dot" style="background:#ef4444"></div>SOS Alert</div>
+        <div class="legend-row"><div class="legend-dot" style="background:#10b981"></div>Supply Request</div>
+        <div class="legend-row"><div class="legend-dot" style="background:#f59e0b"></div>Dead Hand</div>
+        <div class="legend-row"><div class="legend-dot" style="background:#3b82f6"></div>Acoustic / P2P</div>
+        <div class="legend-row"><div class="legend-dot" style="background:#06b6d4"></div>Relief Camp</div>
+      </div>
+    </div>
+
+    <!-- RIGHT DETAIL PANEL -->
+    <aside class="admin-detail">
+      <div class="detail-header">
+        <h3 id="detail-title">SOS Alerts</h3>
+        <span style="font-size:var(--fs-xs);color:var(--text-muted)" id="detail-subtitle">Live feed</span>
+      </div>
+      <div class="detail-content">
+
+        <!-- MODULE: SOS -->
+        <div class="admin-module" id="module-sos">
+          <p style="font-size:var(--fs-xs);color:var(--text-muted);margin-bottom:var(--sp-3)">
+            Click any card to pin location on map.
+          </p>
+          <div id="sos-list">
+            <p style="color:var(--text-muted);font-size:var(--fs-xs);text-align:center;padding:var(--sp-6)">
+              No SOS alerts yet. Waiting for citizen distress signals…
+            </p>
+          </div>
+        </div>
+
+        <!-- MODULE: SUPPLY QUEUE -->
+        <div class="admin-module hidden" id="module-supply">
+          <p style="font-size:var(--fs-xs);color:var(--text-muted);margin-bottom:var(--sp-3)">
+            Incoming supply requests from citizens. Click "Dispatch" to mark drop location on map.
+          </p>
+          <div id="supply-queue-list">
+            <p style="color:var(--text-muted);font-size:var(--fs-xs);text-align:center;padding:var(--sp-6)">
+              No supply requests yet…
+            </p>
+          </div>
+        </div>
+
+        <!-- MODULE: DEAD-HAND -->
+        <div class="admin-module hidden" id="module-deadhand">
+          <p style="font-size:var(--fs-xs);color:var(--text-muted);margin-bottom:var(--sp-3)">
+            Citizens who have failed their dead-hand check-in. <span style="color:var(--red)">Critical = immediate response required.</span>
+          </p>
+          <div id="dh-list">
+            <p style="color:var(--text-muted);font-size:var(--fs-xs);text-align:center;padding:var(--sp-6)">
+              All citizens have checked in. 🟢
+            </p>
+          </div>
+        </div>
+
+        <!-- MODULE: P2P MESH -->
+        <div class="admin-module hidden" id="module-p2p">
+          <div class="card" style="margin-bottom:var(--sp-4)">
+            <div style="font-size:var(--fs-xs);color:var(--text-muted);margin-bottom:var(--sp-2)">
+              Your Node ID:
+              <code class="p2p-node-id-display" style="color:var(--blue);font-family:var(--font-mono)"></code>
+            </div>
+            <button class="btn btn-primary w-full" id="p2p-scan-btn">📡 Scan Bluetooth Devices</button>
+            <div class="divider"></div>
+            <div style="font-size:var(--fs-xs);font-weight:var(--fw-semi);margin-bottom:var(--sp-2)">Connect via WebRTC (cross-device):</div>
+            <div class="flex gap-2">
+              <input class="input" id="p2p-peer-id" placeholder="Remote Node ID…">
+              <button class="btn btn-ghost" id="p2p-connect-btn">Connect</button>
+            </div>
+          </div>
+          <div style="font-size:var(--fs-xs);font-weight:var(--fw-semi);margin-bottom:var(--sp-2)">Discovered Devices:</div>
+          <div id="p2p-device-list"></div>
+          <div class="divider"></div>
+          <div style="font-size:var(--fs-xs);font-weight:var(--fw-semi);margin-bottom:var(--sp-2)">Relay Feed:</div>
+          <div id="p2p-relay-list"></div>
+        </div>
+
+        <!-- MODULE: ACOUSTIC -->
+        <div class="admin-module hidden" id="module-acoustic">
+          <div class="card" style="margin-bottom:var(--sp-4)">
+            <p style="font-size:var(--fs-xs);color:var(--text-secondary);margin-bottom:var(--sp-3)">
+              Opens microphone and decodes FSK acoustic signals transmitted by nearby citizen phones.
+              Live spectrum displayed below.
+            </p>
+            <div class="flex gap-2">
+              <button class="btn btn-primary w-full" id="acoustic-rx-start">🎙 Start Receiver</button>
+              <button class="btn btn-danger w-full hidden" id="acoustic-rx-stop">⏹ Stop</button>
+            </div>
+          </div>
+
+          <canvas id="spectrum-canvas" style="width:100%;height:120px;border-radius:var(--r-md);background:#000;display:block;margin-bottom:var(--sp-3)"></canvas>
+
+          <div style="font-size:var(--fs-xs);font-weight:var(--fw-semi);margin-bottom:var(--sp-2)">Decoded Log:</div>
+          <div class="decoded-log" id="decoded-log">— waiting for signal —</div>
+
+          <div class="divider"></div>
+          <div style="font-size:var(--fs-xs);font-weight:var(--fw-semi);margin-bottom:var(--sp-2)">Received Signals:</div>
+          <div id="acoustic-signal-list"></div>
+        </div>
+
+        <!-- MODULE: QR SCANNER -->
+        <div class="admin-module hidden" id="module-qr">
+          <div class="card" style="margin-bottom:var(--sp-4)">
+            <p style="font-size:var(--fs-xs);color:var(--text-secondary);margin-bottom:var(--sp-3)">
+              Scan citizen emergency QR cards for instant identity verification and relief camp check-in.
+            </p>
+            <div class="flex gap-2">
+              <button class="btn btn-primary w-full" id="qr-start-btn">📸 Start Scanner</button>
+              <button class="btn btn-danger hidden" id="qr-stop-btn">⏹ Stop</button>
+            </div>
+          </div>
+
+          <div id="qr-reader" style="width:100%;border-radius:var(--r-md);overflow:hidden;margin-bottom:var(--sp-4)"></div>
+          <div id="qr-result" class="hidden"></div>
+
+          <div class="divider"></div>
+          <div style="font-size:var(--fs-xs);font-weight:var(--fw-semi);margin-bottom:var(--sp-2)">Recent Check-ins:</div>
+          <div id="qr-checkin-list">
+            <p style="color:var(--text-muted);font-size:var(--fs-xs)">No check-ins yet…</p>
+          </div>
+        </div>
+
+        <!-- MODULE: MISSING PERSONS -->
+        <div class="admin-module hidden" id="module-missing">
+          <p style="font-size:var(--fs-xs);color:var(--text-muted);margin-bottom:var(--sp-3)">
+            Click a person to pin their last known location on the map.
+          </p>
+          <input type="search" class="input" placeholder="Search name…" id="admin-missing-search" style="margin-bottom:var(--sp-4)">
+          <div id="admin-missing-list"></div>
+        </div>
+
+        <!-- MODULE: CAMPS -->
+        <div class="admin-module hidden" id="module-camps">
+          <p style="font-size:var(--fs-xs);color:var(--text-muted);margin-bottom:var(--sp-3)">
+            All relief camps are pre-pinned on the map.
+          </p>
+          <div id="admin-camps-list"></div>
+        </div>
+
+      </div><!-- /detail-content -->
+    </aside>
+
+  </div><!-- /admin-body -->
+</div><!-- /admin-app -->
+
+<!-- SCRIPTS -->
+<script src="js/state.js"></script>
+<script src="js/geo.js"></script>
+<script src="js/hardware.js"></script>
+<script src="js/acoustic.js"></script>
+<script src="js/bluetooth.js"></script>
+<script src="js/qr.js"></script>
+<script src="js/map.js"></script>
+<script src="js/admin-app.js"></script>
+
+<script>
+/* Missing persons admin view */
+function renderAdminMissing(list) {
+  const grid = document.getElementById('admin-missing-list');
+  if (!grid) return;
+  grid.innerHTML = '';
+  (list || []).forEach(p => {
+    const statusColor = {Missing:'red','At Relief Camp':'amber',Found:'green'}[p.status] || 'blue';
+    const card = document.createElement('div');
+    card.className = 'incident-card';
+    card.style.cssText = 'display:flex;gap:12px;align-items:center;cursor:pointer';
+    card.innerHTML = `
+      <img src="${p.photo||'https://ui-avatars.com/api/?name='+encodeURIComponent(p.name)+'&background=263248&color=94a3b8'}"
+           style="width:44px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0"
+           onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=263248&color=94a3b8'">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:var(--fs-sm);font-weight:var(--fw-semi)">${p.name}</div>
+        <div style="font-size:var(--fs-xs);color:var(--text-muted)">${p.age} · ${p.gender} · 🩸${p.bloodType||'?'}</div>
+        <span class="badge badge-${statusColor}" style="margin-top:3px">${p.status}</span>
+        ${p.lastLat ? `<div style="font-size:var(--fs-xs);font-family:var(--font-mono);color:var(--cyan);margin-top:2px">📍 ${p.lastLat.toFixed(4)}, ${p.lastLng.toFixed(4)}</div>` : ''}
+      </div>`;
+    if (p.lastLat && p.lastLng) {
+      card.addEventListener('click', () => MapEng.addMissingPin(p));
+    }
+    grid.appendChild(card);
+  });
+}
+
+function renderAdminCamps(list) {
+  const cont = document.getElementById('admin-camps-list');
+  if (!cont) return;
+  cont.innerHTML = '';
+  (list||[]).forEach(c => {
+    const avail = Math.round((c.available/c.beds)*100);
+    cont.innerHTML += `
+      <div class="incident-card" style="cursor:pointer" onclick="MapEng.focusPin(${c.lat},${c.lng},'camps','<b>⛺ ${c.name}</b><br>Beds: ${c.available}/${c.beds}')">
+        <div class="incident-title">⛺ ${c.name}</div>
+        <div class="incident-sub">${c.address}</div>
+        <div class="progress-track" style="margin:8px 0">
+          <div class="progress-fill" style="width:${avail}%;background:${avail>30?'var(--green)':avail>10?'var(--amber)':'var(--red)'}"></div>
+        </div>
+        <div style="font-size:var(--fs-xs);color:var(--text-muted)">${c.available} of ${c.beds} beds · ${c.water?'💧':'❌'} ${c.medical?'🏥':'❌'} ${c.food?'🍽':'❌'}</div>
+      </div>`;
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const missingData = State.get('missingPersons') || [];
+  renderAdminMissing(missingData);
+  renderAdminCamps(State.get('reliefCamps') || []);
+
+  document.getElementById('admin-missing-search')?.addEventListener('input', (e) => {
+    const q = e.target.value.toLowerCase();
+    renderAdminMissing((State.get('missingPersons')||[]).filter(p =>
+      p.name.toLowerCase().includes(q) || p.status.toLowerCase().includes(q)
+    ));
+  });
+
+  // Update module badges from stored data
+  const updateBadgesFromStore = () => {
+    const sos = document.getElementById('badge-sos');
+    const sup = document.getElementById('badge-supply');
+    const dh  = document.getElementById('badge-deadhand');
+    if (sos) sos.textContent = State.get('sosAlerts')?.length || 0;
+    if (sup) sup.textContent = State.get('supplyRequests')?.length || 0;
+    if (dh)  dh.textContent  = State.get('deadHandAlerts')?.length || 0;
+    const total = (State.get('sosAlerts')?.length||0) + (State.get('supplyRequests')?.length||0) + (State.get('deadHandAlerts')?.length||0);
+    const countEl = document.getElementById('alert-count');
+    if (countEl) countEl.textContent = total;
+  };
+  updateBadgesFromStore();
+
+  State.on('*', () => {
+    updateBadgesFromStore();
+    renderAdminMissing(State.get('missingPersons') || []);
+    renderAdminCamps(State.get('reliefCamps') || []);
+  });
+
+  // QR check-in list
+  State.on(EV.QR_CHECKIN, (p) => {
+    const list = document.getElementById('qr-checkin-list');
+    if (!list) return;
+    const first = list.querySelector('p');
+    if (first) first.remove();
+    const item = document.createElement('div');
+    item.className = 'incident-card ack';
+    item.innerHTML = `<div class="incident-title">✅ ${p?.name || 'Unknown'}</div>
+      <div class="incident-sub">User: ${p?.userId || '—'} · BT: ${p?.bloodType || '—'}</div>
+      <div class="incident-time">${new Date().toLocaleTimeString('en-IN')}</div>`;
+    list.prepend(item);
+  });
+});
+</script>
+</body>
+</html>

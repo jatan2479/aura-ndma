@@ -1,0 +1,284 @@
+/* AURA-NDMA Tactical Design Token System
+   Fully Decoupled Design Variables - Change anything without touching functional logic!
+*/
+
+:root {
+  /* Default: Tactical Dark */
+  --bg-primary: #0B1120;
+  --bg-secondary: #0F172A;
+  --bg-card: #1E293B;
+  --bg-card-hover: #273549;
+  --bg-elevated: #334155;
+  --border-color: #334155;
+  --border-subtle: #1E293B;
+  
+  --color-distress: #EF4444;
+  --color-distress-dark: #B91C1C;
+  --color-distress-glow: rgba(239, 68, 68, 0.35);
+  
+  --color-readiness: #10B981;
+  --color-readiness-dark: #059669;
+  --color-readiness-glow: rgba(16, 185, 129, 0.35);
+  
+  --color-command: #3B82F6;
+  --color-command-dark: #1D4ED8;
+  --color-command-glow: rgba(59, 130, 246, 0.35);
+
+  --color-warning: #F59E0B;
+  --color-warning-dark: #D97706;
+
+  --color-text-primary: #F8FAFC;
+  --color-text-secondary: #94A3B8;
+  --color-text-muted: #64748B;
+
+  /* Shapes & Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+  --radius-card: var(--radius-lg);
+  --radius-btn: var(--radius-md);
+
+  /* Font settings */
+  --font-main: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  --current-font: var(--font-main);
+
+  /* UI Density Scale */
+  --ui-scale: 1;
+  --btn-padding-y: 0.65rem;
+  --btn-padding-x: 1.25rem;
+  --card-padding: 1.25rem;
+}
+
+/* Theme Presets */
+
+/* 1. Cyber High Contrast */
+[data-theme="cyber-contrast"] {
+  --bg-primary: #030712;
+  --bg-secondary: #080F1E;
+  --bg-card: #0F172A;
+  --bg-card-hover: #1E293B;
+  --bg-elevated: #1E293B;
+  --border-color: #38BDF8;
+  --border-subtle: #0284C7;
+  --color-distress: #FF0055;
+  --color-distress-glow: rgba(255, 0, 85, 0.5);
+  --color-readiness: #00FF9D;
+  --color-readiness-glow: rgba(0, 255, 157, 0.5);
+  --color-command: #00D4FF;
+  --color-command-glow: rgba(0, 212, 255, 0.5);
+  --color-warning: #FFE600;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #E0F2FE;
+  --color-text-muted: #7DD3FC;
+}
+
+/* 2. Tactical Amber Night Ops */
+[data-theme="amber-ops"] {
+  --bg-primary: #0E0C0A;
+  --bg-secondary: #171410;
+  --bg-card: #241E17;
+  --bg-card-hover: #332B20;
+  --bg-elevated: #44392B;
+  --border-color: #785E3A;
+  --border-subtle: #44392B;
+  --color-distress: #FF4D4D;
+  --color-distress-glow: rgba(255, 77, 77, 0.4);
+  --color-readiness: #84CC16;
+  --color-readiness-glow: rgba(132, 204, 22, 0.4);
+  --color-command: #F59E0B;
+  --color-command-glow: rgba(245, 158, 11, 0.4);
+  --color-warning: #EAB308;
+  --color-text-primary: #FEF3C7;
+  --color-text-secondary: #D97706;
+  --color-text-muted: #92400E;
+}
+
+/* 3. NDMA Official Command (Navy & Rescue Orange) */
+[data-theme="ndma-official"] {
+  --bg-primary: #071324;
+  --bg-secondary: #0E223D;
+  --bg-card: #153259;
+  --bg-card-hover: #1D4377;
+  --bg-elevated: #255495;
+  --border-color: #2F6DBF;
+  --border-subtle: #1D4377;
+  --color-distress: #FF4500;
+  --color-distress-glow: rgba(255, 69, 0, 0.4);
+  --color-readiness: #10B981;
+  --color-readiness-glow: rgba(16, 185, 129, 0.4);
+  --color-command: #0284C7;
+  --color-command-glow: rgba(2, 132, 199, 0.4);
+  --color-warning: #F59E0B;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #BAE6FD;
+  --color-text-muted: #7DD3FC;
+}
+
+/* 4. High-Visibility Day Ops (Light / Sun-Readable) */
+[data-theme="day-ops"] {
+  --bg-primary: #F1F5F9;
+  --bg-secondary: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F8FAFC;
+  --bg-elevated: #E2E8F0;
+  --border-color: #CBD5E1;
+  --border-subtle: #E2E8F0;
+  --color-distress: #DC2626;
+  --color-distress-glow: rgba(220, 38, 38, 0.25);
+  --color-readiness: #059669;
+  --color-readiness-glow: rgba(5, 150, 105, 0.25);
+  --color-command: #2563EB;
+  --color-command-glow: rgba(37, 99, 235, 0.25);
+  --color-warning: #D97706;
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #475569;
+  --color-text-muted: #64748B;
+}
+
+/* Shape Modifiers */
+[data-shape="sharp"] {
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-card: 0px;
+  --radius-btn: 0px;
+}
+
+[data-shape="modern"] {
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-card: 14px;
+  --radius-btn: 10px;
+}
+
+[data-shape="tactile"] {
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-card: 24px;
+  --radius-btn: 16px;
+}
+
+[data-shape="pill"] {
+  --radius-sm: 8px;
+  --radius-md: 9999px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-card: 20px;
+  --radius-btn: 9999px;
+}
+
+/* Density Scales */
+[data-density="compact"] {
+  --ui-scale: 0.88;
+  --btn-padding-y: 0.4rem;
+  --btn-padding-x: 0.85rem;
+  --card-padding: 0.85rem;
+}
+
+[data-density="standard"] {
+  --ui-scale: 1;
+  --btn-padding-y: 0.65rem;
+  --btn-padding-x: 1.25rem;
+  --card-padding: 1.25rem;
+}
+
+[data-density="large"] {
+  --ui-scale: 1.15;
+  --btn-padding-y: 0.85rem;
+  --btn-padding-x: 1.5rem;
+  --card-padding: 1.5rem;
+}
+
+/* Dynamic Classes using Tokens */
+.aura-bg { background-color: var(--bg-primary); }
+.aura-bg-secondary { background-color: var(--bg-secondary); }
+.aura-card { 
+  background-color: var(--bg-card); 
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-card);
+  padding: var(--card-padding);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.aura-card:hover {
+  background-color: var(--bg-card-hover);
+}
+
+.aura-btn {
+  border-radius: var(--radius-btn);
+  padding: var(--btn-padding-y) var(--btn-padding-x);
+  font-family: var(--current-font);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.aura-btn-distress {
+  background-color: var(--color-distress);
+  color: #FFFFFF;
+  box-shadow: 0 0 18px var(--color-distress-glow);
+}
+.aura-btn-distress:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+}
+
+.aura-btn-command {
+  background-color: var(--color-command);
+  color: #FFFFFF;
+  box-shadow: 0 0 18px var(--color-command-glow);
+}
+.aura-btn-command:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+}
+
+.aura-btn-readiness {
+  background-color: var(--color-readiness);
+  color: #FFFFFF;
+  box-shadow: 0 0 18px var(--color-readiness-glow);
+}
+.aura-btn-readiness:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+}
+
+.aura-btn-secondary {
+  background-color: var(--bg-elevated);
+  color: var(--color-text-primary);
+  border: 1px solid var(--border-color);
+}
+.aura-btn-secondary:hover {
+  background-color: var(--bg-card-hover);
+}
+
+/* Pulsing radar effects */
+@keyframes auraPulse {
+  0% { transform: scale(0.95); opacity: 0.8; box-shadow: 0 0 0 0 var(--color-distress-glow); }
+  70% { transform: scale(1.05); opacity: 1; box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+  100% { transform: scale(0.95); opacity: 0.8; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.animate-aura-pulse {
+  animation: auraPulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+@keyframes beaconFlash {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.15; }
+}
+
+.animate-beacon-flash {
+  animation: beaconFlash 0.6s infinite ease-in-out;
+}

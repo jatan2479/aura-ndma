@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="theme-color" content="#0F172A">
+  <title>AURA-NDMA | Citizen Portal</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/citizen.css">
+  <!-- QR Code generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+<div id="toast-container"></div>
+
+<div class="citizen-app">
+
+  <!-- HEADER -->
+  <header class="citizen-header">
+    <div>
+      <div class="logo">AURA<span>-NDMA</span></div>
+      <div class="gps-bar">
+        <div class="gps-dot" id="gps-dot"></div>
+        <span id="gps-coords">Acquiring GPS…</span>
+      </div>
+    </div>
+
+    <!-- Dead-Hand Widget -->
+    <div class="dh-widget" id="dh-widget" title="Dead-Hand Switch">
+      <div class="dh-dot"></div>
+      <span class="dh-time" id="dh-time">OFF</span>
+      <span style="font-size:0.7rem;color:var(--text-muted)">⏱</span>
+    </div>
+
+    <!-- QR & back -->
+    <div class="flex gap-2">
+      <button class="btn btn-ghost btn-sm" id="show-qr-btn" title="My Emergency QR">🔐</button>
+      <a href="index.html" class="btn btn-ghost btn-sm" title="Switch Role">⇦</a>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="citizen-content">
+
+    <!-- ─── TAB 1: SOS ──────────────────────────────────────── -->
+    <section class="tab-section active" id="tab-sos">
+      <div class="section-header">
+        <div class="section-icon" style="background:var(--red-dim)">🆘</div>
+        <h2>Emergency SOS</h2>
+      </div>
+
+      <div class="sos-wrapper">
+        <div class="sos-button-outer" id="sos-btn-outer">
+          <div class="ring"></div>
+          <div class="ring"></div>
+          <div class="ring"></div>
+          <button class="sos-btn-main" id="sos-main-btn">
+            <span class="sos-icon-big">🆘</span>
+            <span>SOS</span>
+          </button>
+        </div>
+
+        <p style="text-align:center;color:var(--text-secondary);font-size:var(--fs-sm)">
+          Tap once to send distress signal with live GPS to command centre.<br>Tap again to cancel.
+        </p>
+
+        <div class="sos-location-card">
+          <div class="coord-row">
+            <span class="coord-label">Latitude</span>
+            <span class="coord-val" id="sos-lat">—</span>
+          </div>
+          <div class="coord-row">
+            <span class="coord-label">Longitude</span>
+            <span class="coord-val" id="sos-lng">—</span>
+          </div>
+          <div class="coord-row">
+            <span class="coord-label">Accuracy</span>
+            <span class="coord-val" id="sos-acc">—</span>
+          </div>
+          <div class="coord-row">
+            <span class="coord-label">Altitude</span>
+            <span class="coord-val" id="sos-alt">—</span>
+          </div>
+          <div class="coord-row">
+            <span class="coord-label">Last Fix</span>
+            <span class="coord-val" id="sos-ts">—</span>
+          </div>
+        </div>
+
+        <!-- Acoustic Transmitter (compact, citizen side) -->
+        <div class="card card--blue w-full">
+          <div style="font-size:var(--fs-sm);font-weight:var(--fw-semi);margin-bottom:var(--sp-3)">📡 Acoustic Transmitter</div>
+          <p style="font-size:var(--fs-xs);color:var(--text-secondary);margin-bottom:var(--sp-3)">
+            Encode and broadcast your location as an audio signal detectable by nearby devices.
+          </p>
+          <input type="text" class="input" id="acoustic-tx-text" placeholder="Message or coordinates to transmit…" style="margin-bottom:var(--sp-3)">
+          <label style="display:flex;align-items:center;gap:var(--sp-2);font-size:var(--fs-xs);color:var(--text-secondary);margin-bottom:var(--sp-3)">
+            <input type="checkbox" id="acoustic-torch-sync"> Sync torch flash with audio
+          </label>
+          <button class="btn btn-primary w-full" id="acoustic-tx-btn">📡 Transmit via Sound</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── TAB 2: SUPPLIES ─────────────────────────────────── -->
+    <section class="tab-section" id="tab-supplies">
+      <div class="section-header">
+        <div class="section-icon" style="background:var(--green-dim)">📦</div>
+        <h2>Request Supplies</h2>
+      </div>
+      <p style="font-size:var(--fs-sm);color:var(--text-secondary);margin-bottom:var(--sp-5)">
+        Select what you need. Your live GPS coordinates will be bundled with the request.
+      </p>
+
+      <div class="supply-grid">
+        <div class="supply-item" data-key="Food">
+          <div class="s-icon">🍚</div>
+          <div class="s-label">Food</div>
+          <div class="supply-qty">
+            <button class="qty-btn" data-delta="-">−</button>
+            <span class="supply-qty-val">0</span>
+            <button class="qty-btn" data-delta="+">+</button>
+          </div>
+        </div>
+        <div class="supply-item" data-key="Water">
+          <div class="s-icon">💧</div>
+          <div class="s-label">Clean Water</div>
+          <div class="supply-qty">
+            <button class="qty-btn" data-delta="-">−</button>
+            <span class="supply-qty-val">0</span>
+            <button class="qty-btn" data-delta="+">+</button>
+          </div>
+        </div>
+        <div class="supply-item" data-key="Medicine">
+          <div class="s-icon">💊</div>
+          <div class="s-label">Medicine</div>
+          <div class="supply-qty">
+            <button class="qty-btn" data-delta="-">−</button>
+            <span class="supply-qty-val">0</span>
+            <button class="qty-btn" data-delta="+">+</button>
+          </div>
+        </div>
+        <div class="supply-item" data-key="Blankets">
+          <div class="s-icon">🛏️</div>
+          <div class="s-label">Blankets</div>
+          <div class="supply-qty">
+            <button class="qty-btn" data-delta="-">−</button>
+            <span class="supply-qty-val">0</span>
+            <button class="qty-btn" data-delta="+">+</button>
+          </div>
+        </div>
+        <div class="supply-item" data-key="First Aid">
+          <div class="s-icon">🩺</div>
+          <div class="s-label">First Aid</div>
+          <div class="supply-qty">
+            <button class="qty-btn" data-delta="-">−</button>
+            <span class="supply-qty-val">0</span>
+            <button class="qty-btn" data-delta="+">+</button>
+          </div>
+        </div>
+        <div class="supply-item" data-key="Sanitation">
+          <div class="s-icon">🧼</div>
+          <div class="s-label">Sanitation</div>
+          <div class="supply-qty">
+            <button class="qty-btn" data-delta="-">−</button>
+            <span class="supply-qty-val">0</span>
+            <button class="qty-btn" data-delta="+">+</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-success btn-lg w-full" id="supply-submit">
+        📤 Send Supply Request
+      </button>
+    </section>
+
+    <!-- ─── TAB 3: PREPAREDNESS ─────────────────────────────── -->
+    <section class="tab-section" id="tab-preparedness">
+      <div class="section-header">
+        <div class="section-icon" style="background:var(--blue-dim)">🏠</div>
+        <h2>Preparedness Score</h2>
+      </div>
+
+      <div id="survey-area">
+        <div class="survey-progress">
+          <div class="flex justify-between" style="margin-bottom:var(--sp-2)">
+            <span class="text-sm text-muted" id="survey-q-num">Question 1 of 8</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="survey-fill" style="width:0%;background:var(--blue)"></div>
+          </div>
+        </div>
+
+        <div class="survey-step">
+          <div class="survey-question" id="survey-question">Loading…</div>
+          <div class="survey-options" id="survey-opts"></div>
+        </div>
+
+        <div class="flex gap-3" style="margin-top:var(--sp-5)">
+          <button class="btn btn-ghost" id="survey-prev" style="visibility:hidden">← Back</button>
+          <button class="btn btn-primary w-full" id="survey-next">Next →</button>
+        </div>
+      </div>
+
+      <!-- Score Result Card -->
+      <div id="score-card" class="score-card hidden">
+        <div class="score-ring" id="score-ring">
+          <span class="score-value" id="score-value">—</span>
+          <span class="score-label" id="score-label">Readiness</span>
+        </div>
+        <h3 style="margin-bottom:var(--sp-4)">Your Preparedness Report</h3>
+        <ul style="list-style:none;text-align:left;padding:0" id="score-recs"></ul>
+        <button class="btn btn-ghost w-full" id="survey-restart" style="margin-top:var(--sp-5)">🔄 Retake Assessment</button>
+      </div>
+    </section>
+
+    <!-- ─── TAB 4: MISSING PERSONS ──────────────────────────── -->
+    <section class="tab-section" id="tab-missing">
+      <div class="section-header">
+        <div class="section-icon" style="background:var(--amber-dim)">👤</div>
+        <h2>Missing Persons</h2>
+      </div>
+
+      <!-- View -->
+      <div id="missing-tab-view">
+        <div class="missing-search">
+          <input type="search" class="input" id="missing-search" placeholder="Search by name, status…">
+        </div>
+        <div id="missing-grid"></div>
+        <button class="btn btn-amber w-full" style="margin-top:var(--sp-4)" id="missing-report-toggle">
+          + Report Missing Person
+        </button>
+      </div>
+
+      <!-- Report Form -->
+      <div id="missing-report-form" class="hidden">
+        <div style="margin-bottom:var(--sp-4)">
+          <button class="btn btn-ghost btn-sm" id="missing-form-back">← Back to directory</button>
+        </div>
+
+        <div class="upload-btn-area" id="missing-upload-area">
+          <div>📷 Tap to upload photo</div>
+          <div style="font-size:var(--fs-xs);color:var(--text-muted)">Camera or gallery</div>
+        </div>
+        <input type="file" id="missing-photo-input" accept="image/*" capture="environment" style="display:none">
+        <img id="missing-photo-preview" class="upload-preview hidden" alt="Preview">
+
+        <div style="display:grid;gap:var(--sp-3);margin-bottom:var(--sp-4)">
+          <input type="text"   class="input" id="mp-name"     placeholder="Full name *">
+          <input type="number" class="input" id="mp-age"      placeholder="Age">
+          <select class="input" id="mp-gender">
+            <option value="">Gender</option>
+            <option>Male</option><option>Female</option><option>Other</option>
+          </select>
+          <select class="input" id="mp-bloodtype">
+            <option value="Unknown">Blood Type</option>
+            <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+            <option>O+</option><option>O-</option><option>AB+</option><option>AB-</option>
+          </select>
+          <input type="tel"  class="input" id="mp-contact"  placeholder="Contact number">
+          <textarea class="input" id="mp-desc" placeholder="Description — clothes, last seen location…" rows="3" style="resize:vertical"></textarea>
+        </div>
+
+        <p style="font-size:var(--fs-xs);color:var(--text-muted);margin-bottom:var(--sp-3)">
+          📍 Your current GPS coordinates will be recorded as the last known area.
+        </p>
+        <button class="btn btn-danger w-full" id="missing-submit">📤 File Missing Person Report</button>
+      </div>
+    </section>
+
+    <!-- ─── TAB 5: CAMPS ────────────────────────────────────── -->
+    <section class="tab-section" id="tab-camps">
+      <div class="section-header">
+        <div class="section-icon" style="background:var(--cyan-dim)">⛺</div>
+        <h2>Relief Camps</h2>
+      </div>
+      <p style="font-size:var(--fs-xs);color:var(--text-muted);margin-bottom:var(--sp-4)">
+        📍 Sorted by distance from your live GPS location
+      </p>
+      <div id="camps-list"></div>
+    </section>
+
+    <!-- ─── TAB 6: NEWS ──────────────────────────────────────── -->
+    <section class="tab-section" id="tab-news">
+      <div class="section-header">
+        <div class="section-icon" style="background:var(--purple-dim)">📰</div>
+        <h2>Alerts & News</h2>
+      </div>
+      <p style="font-size:var(--fs-xs);color:var(--text-muted);margin-bottom:var(--sp-4)">
+        Live location-aware disaster alerts · NDMA RSS feed
+      </p>
+      <button class="btn btn-ghost btn-sm" style="margin-bottom:var(--sp-4)" onclick="fetchNDMANews()">🔄 Refresh</button>
+      <div id="news-list"></div>
+    </section>
+
+  </main>
+
+  <!-- BOTTOM NAV -->
+  <nav class="citizen-nav">
+    <button class="nav-item active" data-tab="sos">
+      <span class="nav-icon">🆘</span>SOS
+    </button>
+    <button class="nav-item" data-tab="supplies">
+      <span class="nav-icon">📦</span>Supplies
+    </button>
+    <button class="nav-item" data-tab="preparedness">
+      <span class="nav-icon">🏠</span>Score
+    </button>
+    <button class="nav-item" data-tab="missing">
+      <span class="nav-icon">👤</span>Missing
+    </button>
+    <button class="nav-item" data-tab="camps">
+      <span class="nav-icon">⛺</span>Camps
+    </button>
+    <button class="nav-item" data-tab="news">
+      <span class="nav-icon">📰</span>News
+    </button>
+  </nav>
+
+</div><!-- /citizen-app -->
+
+<!-- ── QR MODAL ──────────────────────────────────────────────── -->
+<div class="modal-backdrop hidden" id="qr-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">🔐 Emergency QR Card</span>
+      <button class="modal-close" id="close-qr-modal">×</button>
+    </div>
+    <p style="font-size:var(--fs-xs);color:var(--text-secondary);margin-bottom:var(--sp-4)">
+      Show this QR code to NDMA responders for instant identity & medical verification. Updates with your live GPS.
+    </p>
+
+    <!-- Profile fields for QR -->
+    <div style="display:grid;gap:var(--sp-2);margin-bottom:var(--sp-4)">
+      <input class="input" id="profile-name"   placeholder="Your full name">
+      <input class="input" id="profile-age"    placeholder="Age" type="number">
+      <select class="input" id="profile-bt">
+        <option value="Unknown">Blood Type</option>
+        <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+        <option>O+</option><option>O-</option><option>AB+</option><option>AB-</option>
+      </select>
+      <input class="input" id="profile-allergy" placeholder="Allergies (or None)">
+      <input class="input" id="profile-meds"    placeholder="Medications (or None)">
+      <input class="input" id="profile-ec"      placeholder="Emergency contact number">
+    </div>
+    <button class="btn btn-primary w-full" onclick="generateCitizenQR()" style="margin-bottom:var(--sp-4)">🔄 Regenerate QR</button>
+
+    <div class="qr-wrapper">
+      <div class="qr-canvas-wrap">
+        <div id="qr-display"></div>
+      </div>
+      <p style="font-size:var(--fs-xs);color:var(--text-muted)">
+        User: <span class="user-label-text font-mono"></span><br>
+        GPS synced · Updates every 30s
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ── DEAD-HAND MODAL ───────────────────────────────────────── -->
+<div class="modal-backdrop hidden" id="dh-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">⏱ Dead-Hand Switch</span>
+      <button class="modal-close" id="dh-close">×</button>
+    </div>
+    <p style="font-size:var(--fs-xs);color:var(--text-secondary);margin-bottom:var(--sp-4)">
+      If you don't check in before the timer expires, the system automatically:<br>
+      1. Activates your torch strobe<br>
+      2. Plays an emergency siren<br>
+      3. Sends your GPS location to the Admin command centre
+    </p>
+
+    <div style="margin-bottom:var(--sp-4)">
+      <label style="font-size:var(--fs-sm);font-weight:var(--fw-semi);display:block;margin-bottom:var(--sp-2)">Check-in interval:</label>
+      <select class="input" id="dh-duration">
+        <option value="30">30 seconds (test mode)</option>
+        <option value="300">5 minutes</option>
+        <option value="900">15 minutes</option>
+        <option value="1800">30 minutes</option>
+        <option value="3600" selected>1 hour (standard)</option>
+        <option value="7200">2 hours</option>
+        <option value="14400">4 hours</option>
+      </select>
+    </div>
+
+    <div style="display:grid;gap:var(--sp-3)">
+      <button class="btn btn-success btn-lg" id="dh-arm-btn">🔒 Arm Dead-Hand Switch</button>
+      <button class="btn btn-primary btn-lg" id="dh-checkin-btn">✅ I'm Safe — Check In</button>
+      <button class="btn btn-ghost" id="dh-disarm-btn">🔓 Disarm</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCRIPTS -->
+<script src="js/state.js"></script>
+<script src="js/geo.js"></script>
+<script src="js/hardware.js"></script>
+<script src="js/acoustic.js"></script>
+<script src="js/bluetooth.js"></script>
+<script src="js/deadhand.js"></script>
+<script src="js/qr.js"></script>
+<script src="js/citizen-app.js"></script>
+
+<script>
+  // Missing persons toggle
+  document.getElementById('missing-report-toggle')?.addEventListener('click', () => {
+    document.getElementById('missing-tab-view').classList.add('hidden');
+    document.getElementById('missing-report-form').classList.remove('hidden');
+  });
+  document.getElementById('missing-form-back')?.addEventListener('click', () => {
+    document.getElementById('missing-tab-view').classList.remove('hidden');
+    document.getElementById('missing-report-form').classList.add('hidden');
+  });
+</script>
+</body>
+</html>
