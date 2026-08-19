@@ -277,6 +277,9 @@ io.on('connection', (socket) => {
     console.log(`[AURA-SOCKET] Device Node Disconnected: ${socket.id}`);
   });
 });
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/index.html');
+});
 
 const PORT = process.env.PORT || 3000;
 httpServer.listen(PORT, '0.0.0.0', () => {
