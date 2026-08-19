@@ -1,6 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+  // Connect to your laptop server (replace YOUR_IP with your laptop's Wi-Fi IPv4 address, e.g., 192.168.1.4)
+  const socket = io("http://192.168.1.4:3000");
+  function sendCitizenUpdate(actionType, extraData = {}) {
+  const payload = {
+    type: actionType,
+    lat: extraData.lat || 19.0760,
+    lng: extraData.lng || 72.8777,
+    timestamp: new Date().toLocaleTimeString(),
+    ...extraData
+  };
+
+  if (typeof socket !== 'undefined') {
+    socket.emit('citizen_action', payload);
+    console.log(`[CITIZEN] Sent action: ${actionType}`);
+  } else {
+    console.error("Socket not connected!");
+  }
+}
+
+function triggerAutomaticSOS() {
+  console.log("🚨 60s idle limit reached. Auto-triggering SOS!");
+  sendCitizenUpdate('AUTOMATED_DEAD_MAN_ALERT', { status: 'Unresponsive for 60s' });
+  
+  document.body.style.backgroundColor = "#7f1d1d";
+  alert("⚠️ Inactivity detected! Emergency SOS automatically sent to Command Grid.");
+}
+
+  function sendSOSAlert() {
+    socket.emit('citizen_broadcast', {
+      lat: 19.0760,
+      lng: 72.8777,
+      time: new Date().toLocaleTimeString()
+    });
+  }
+</script>
+<script src="https://cdn.tailwindcss.com"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <meta name="theme-color" content="#0F172A">

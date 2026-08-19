@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="https://cdn.tailwindcss.com"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0F172A">
@@ -277,6 +278,27 @@
 <script src="js/admin-app.js"></script>
 
 <script>
+  // Listen for real-time broadcasts coming from any citizen device
+socket.on('admin_update', (data) => {
+  console.log("📥 [ADMIN] Received update from citizen:", data);
+
+  // Handle different feature types
+  if (data.type === 'SOS' || data.type === 'AUTOMATED_DEAD_MAN_ALERT') {
+    // High-priority emergency alert
+    alert(`🚨 EMERGENCY ALERT (${data.type})!\nTime: ${data.timestamp}`);
+    // TODO: Add code here to drop a red pulsing marker on your admin map
+  } 
+  else if (data.type === 'SAFE') {
+    // Citizen marked safe
+    alert(`🟢 Citizen checked in safe at ${data.timestamp}`);
+    // TODO: Change citizen marker to green on your admin map
+  } 
+  else if (data.type === 'GPS_UPDATE') {
+    // Live tracking update
+    console.updating(`Updating GPS coordinates: ${data.lat}, ${data.lng}`);
+    // TODO: Move the citizen icon on your admin map to new lat/lng
+  }
+});
 /* Missing persons admin view */
 function renderAdminMissing(list) {
   const grid = document.getElementById('admin-missing-list');

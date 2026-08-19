@@ -131,6 +131,12 @@ app.get('/api/state', (req, res) => {
 // Socket.io Real-Time Dispatch Engine
 io.on('connection', (socket) => {
   console.log(`[AURA-SOCKET] Device Node Connected: ${socket.id}`);
+  // Listen for ANY feature action from a citizen phone
+  socket.on('citizen_action', (data) => {
+    console.log("Feature action received:", data);
+    // Relay it instantly to all admin screens
+    io.emit('admin_update', data);
+  });
 
   // Send current synchronized state
   socket.emit('state_sync', state);
@@ -280,3 +286,4 @@ httpServer.listen(PORT, '0.0.0.0', () => {
   console.log(`  Multi-Phone Network: http://0.0.0.0:${PORT}`);
   console.log(`========================================================\n`);
 });
+// Add this to server.js
